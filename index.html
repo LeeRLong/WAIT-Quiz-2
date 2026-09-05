@@ -1,0 +1,598 @@
+<!-- WAIT — Find Your Starting Line
+     Self-location instrument for drleelong.com
+     Single file. Drop into a page or embed via iframe.
+     EMAIL INTEGRATION: search for "INTEGRATION POINT" below. -->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,400;0,500;0,700;1,400&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300&display=swap" rel="stylesheet">
+
+<style>
+  .wsl, .wsl *, .wsl *::before, .wsl *::after { box-sizing: border-box; }
+
+  .wsl {
+    --paper: #EDEFEC;
+    --ink: #1F3A34;
+    --ink-soft: #5F706C;
+    --rule: #C9D0CC;
+    --brass: #A8792C;
+    --tint: #E1E7E3;
+
+    --serif: "Newsreader", Georgia, "Times New Roman", serif;
+    --sans: "Karla", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    padding: 40px 24px 72px;
+    margin: 0;
+  }
+
+  .wsl-inner { max-width: 620px; margin: 0 auto; }
+
+  /* ---------- the line: the one carrying motif ---------- */
+  .wsl-line { height: 2px; background: var(--rule); position: relative; margin: 0 0 40px; }
+  .wsl-line i {
+    display: block; height: 100%; width: 0%; background: var(--brass);
+    transition: width .45s cubic-bezier(.4,0,.2,1);
+  }
+  .wsl-count {
+    font-size: 13px; letter-spacing: .02em; color: var(--ink-soft);
+    margin: 10px 0 0; font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- type ---------- */
+  .wsl h1 {
+    font-family: var(--serif); font-weight: 400; font-size: clamp(34px, 7vw, 52px);
+    line-height: 1.08; letter-spacing: -.015em; margin: 0 0 20px;
+  }
+  .wsl h2 {
+    font-family: var(--serif); font-weight: 400; font-size: clamp(25px, 5vw, 33px);
+    line-height: 1.2; letter-spacing: -.01em; margin: 0 0 16px;
+  }
+  .wsl h3 {
+    font-family: var(--serif); font-weight: 500; font-size: 22px;
+    line-height: 1.25; margin: 0 0 8px;
+  }
+  .wsl p { margin: 0 0 16px; max-width: 60ch; }
+  .wsl .lede { font-family: var(--serif); font-size: 20px; line-height: 1.5; font-weight: 300; }
+  .wsl .quiet { color: var(--ink-soft); font-size: 15px; }
+  .wsl em { font-style: italic; }
+
+  /* ---------- scenario ---------- */
+  .wsl-stem {
+    font-family: var(--serif); font-size: clamp(21px, 4.2vw, 26px);
+    line-height: 1.35; font-weight: 400; margin: 0 0 28px; max-width: 30ch;
+  }
+
+  .wsl-opts { list-style: none; margin: 0; padding: 0; }
+  .wsl-opts li { margin: 0 0 2px; }
+  .wsl-opt {
+    display: block; width: 100%; text-align: left; cursor: pointer;
+    font: inherit; color: inherit; background: transparent;
+    border: 0; border-left: 2px solid var(--rule);
+    padding: 15px 16px 15px 18px; line-height: 1.5;
+    transition: background .16s ease, border-color .16s ease, padding-left .16s ease;
+  }
+  .wsl-opt:hover { background: var(--tint); border-left-color: var(--ink-soft); }
+  .wsl-opt:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+  .wsl-opt[aria-pressed="true"] {
+    background: var(--tint); border-left: 5px solid var(--brass); padding-left: 15px; font-weight: 500;
+  }
+
+  /* ---------- controls ---------- */
+  .wsl-nav { display: flex; align-items: center; gap: 20px; margin-top: 32px; }
+  .wsl-btn {
+    font: inherit; font-weight: 700; cursor: pointer;
+    background: var(--ink); color: var(--paper); border: 2px solid var(--ink);
+    padding: 13px 30px; transition: background .16s ease, color .16s ease;
+  }
+  .wsl-btn:hover:not(:disabled) { background: transparent; color: var(--ink); }
+  .wsl-btn:disabled { opacity: .3; cursor: default; }
+  .wsl-btn:focus-visible { outline: 2px solid var(--brass); outline-offset: 3px; }
+  .wsl-back {
+    font: inherit; font-size: 15px; background: none; border: 0; padding: 6px 0;
+    color: var(--ink-soft); cursor: pointer; text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .wsl-back:hover { color: var(--ink); }
+  .wsl-back:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+
+  /* ---------- results ---------- */
+  .wsl-primary {
+    font-family: var(--serif); font-weight: 300;
+    font-size: clamp(26px, 5vw, 36px);
+    line-height: 1.25; margin: 0 0 22px; letter-spacing: -.01em; max-width: 22ch;
+  }
+  .wsl-said { font-size: 17px; margin: 0 0 26px; max-width: 58ch; }
+  .wsl-said b { font-weight: 700; }
+
+  .wsl-freq { margin: 0 0 30px; }
+  .wsl-freq > div { padding: 18px 0; border-top: 1px solid var(--rule); }
+  .wsl-freq > div:last-of-type { border-bottom: 1px solid var(--rule); }
+  .wsl-freq p { font-family: var(--serif); font-size: 19px; line-height: 1.35; margin: 0 0 12px; max-width: 46ch; }
+  .wsl-scale { display: flex; flex-wrap: wrap; gap: 6px; }
+  .wsl-tick {
+    font: inherit; font-size: 14px; cursor: pointer; background: transparent;
+    color: var(--ink-soft); border: 1px solid var(--rule); padding: 8px 14px;
+    transition: background .14s ease, color .14s ease, border-color .14s ease;
+  }
+  .wsl-tick:hover { border-color: var(--ink-soft); color: var(--ink); }
+  .wsl-tick:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
+  .wsl-tick[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); font-weight: 700; }
+
+  .wsl-band { border-left: 2px solid var(--ink-soft); padding: 2px 0 2px 20px; margin: 32px 0 0; max-width: 58ch; }
+  .wsl-def {
+    border-left: 2px solid var(--brass); padding: 2px 0 2px 20px;
+    margin: 0 0 26px; max-width: 58ch;
+  }
+  .wsl-ask {
+    font-family: var(--serif); font-style: italic; font-size: 20px;
+    line-height: 1.4; margin: 0 0 8px;
+  }
+
+  .wsl-rank { margin: 40px 0 0; }
+  .wsl-row { display: flex; align-items: baseline; gap: 14px; padding: 11px 0; border-bottom: 1px solid var(--rule); }
+  .wsl-row b { font-weight: 500; flex: 0 0 auto; }
+  .wsl-bar { flex: 1 1 auto; height: 2px; background: var(--rule); position: relative; top: -3px; }
+  .wsl-bar i { display: block; height: 100%; background: var(--brass); }
+  .wsl-row span { font-size: 14px; color: var(--ink-soft); font-variant-numeric: tabular-nums; flex: 0 0 auto; }
+
+  .wsl-four > div { padding: 22px 0; border-top: 1px solid var(--rule); }
+  .wsl-four > div:last-child { border-bottom: 1px solid var(--rule); }
+
+  /* ---------- capture ---------- */
+  .wsl-gate { border-top: 2px solid var(--ink); padding-top: 28px; margin-top: 40px; }
+  .wsl-field { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 10px; }
+  .wsl-field input {
+    flex: 1 1 240px; font: inherit; padding: 13px 14px;
+    border: 2px solid var(--rule); background: #fff; color: var(--ink); min-width: 0;
+  }
+  .wsl-field input:focus { outline: 2px solid var(--brass); outline-offset: 1px; border-color: var(--ink); }
+  .wsl-err { color: #8C2F1D; font-size: 14px; margin: 0; min-height: 20px; }
+
+  .wsl-hide { display: none; }
+  .wsl-fade { animation: wslIn .3s ease both; }
+  @keyframes wslIn { from { opacity: 0; } to { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) {
+    .wsl-fade { animation: none; }
+    .wsl-line i { transition: none; }
+    .wsl-opt { transition: none; }
+  }
+</style>
+
+<div class="wsl">
+<div class="wsl-inner">
+
+  <!-- ================= INTRO ================= -->
+  <section id="wslIntro">
+    <div class="wsl-line"><i style="width:0%"></i></div>
+    <h1>Find your starting line.</h1>
+    <p class="lede">It's safer to look out there than in here. That external focus is what stands between you and the question <em>Where am I in this?</em> — and it shows up in four ways.</p>
+    <p>Mind reading. The control illusion. The pattern loop. Speaking a second language. Most of us lean on one more than the rest. Twelve moments follow — for each, choose the response closest to what actually happens in you, not the one you'd like to be true.</p>
+    <p class="quiet">Takes about four minutes. This is a self-location exercise, not an assessment, a diagnosis, or a substitute for working with a therapist.</p>
+    <div class="wsl-nav"><button class="wsl-btn" id="wslStart" type="button">Begin</button></div>
+  </section>
+
+  <!-- ================= QUESTIONS ================= -->
+  <section id="wslQuiz" class="wsl-hide">
+    <div class="wsl-line"><i id="wslFill" style="width:0%"></i></div>
+    <p class="wsl-count" id="wslCount"></p>
+    <h2 class="wsl-stem" id="wslStem"></h2>
+    <ul class="wsl-opts" id="wslOpts"></ul>
+    <div class="wsl-nav">
+      <button class="wsl-btn" id="wslNext" type="button" disabled>Next</button>
+      <button class="wsl-back wsl-hide" id="wslPrev" type="button">Back</button>
+    </div>
+  </section>
+
+  <!-- ================= INTENSITY ================= -->
+  <section id="wslFreq" class="wsl-hide">
+    <div class="wsl-line"><i style="width:75%"></i></div>
+    <p class="wsl-count">Four last questions</p>
+    <h2 class="wsl-stem" style="max-width:34ch">Set the moments aside. In an ordinary week, how often does each of these happen?</h2>
+    <div class="wsl-freq" id="wslFreqList"></div>
+    <div class="wsl-nav">
+      <button class="wsl-btn" id="wslFreqNext" type="button" disabled>Finish</button>
+      <button class="wsl-back" id="wslFreqPrev" type="button">Back</button>
+    </div>
+  </section>
+
+  <!-- ================= GATE ================= -->
+  <section id="wslGate" class="wsl-hide">
+    <div class="wsl-line"><i style="width:100%"></i></div>
+    <p class="wsl-count">Complete</p>
+    <h2>That's all sixteen.</h2>
+    <p class="lede">Your result shows where you were standing across every moment, which of the four showed up most, and the one question to start asking yourself.</p>
+    <p>Tell me where to send it.</p>
+    <div class="wsl-gate">
+      <div class="wsl-field">
+        <input type="text" id="wslName" placeholder="First name" autocomplete="given-name" aria-label="First name">
+        <input type="email" id="wslEmail" placeholder="Email address" autocomplete="email" aria-label="Email address">
+      </div>
+      <p class="wsl-err" id="wslErr" role="alert"></p>
+      <button class="wsl-btn" id="wslSend" type="button">Show my result</button>
+      <p class="quiet" style="margin-top:16px">You'll also get occasional notes from me on the work of self-location. Unsubscribe any time.</p>
+    </div>
+  </section>
+
+  <!-- ================= RESULT ================= -->
+  <section id="wslResult" class="wsl-hide">
+    <div class="wsl-line"><i style="width:100%"></i></div>
+    <p class="wsl-count" id="wslHello"></p>
+    <h2 class="wsl-primary">This is a place you're standing, not a kind of person you are.</h2>
+    <p class="wsl-said" id="wslSaid"></p>
+
+    <div class="wsl-rank" style="margin-top:0">
+      <h3>All four, across your twelve moments</h3>
+      <div id="wslRank"></div>
+      <p class="quiet" style="margin-top:14px">Every one of them showed up somewhere. That's true for everybody. Answer these again in three months and the order may well have moved.</p>
+    </div>
+
+    <div style="margin-top:44px">
+      <h3 id="wslDefTitle"></h3>
+      <div class="wsl-def" style="margin-top:14px"><p id="wslDef" style="margin:0"></p></div>
+      <p class="wsl-ask" id="wslAsk"></p>
+      <p class="quiet">Start there. Not with what they did — with where you were.</p>
+    </div>
+
+    <div class="wsl-band"><p id="wslBand" style="margin:0"></p></div>
+
+    <div style="margin-top:48px">
+      <h3>The four, in full</h3>
+      <p class="quiet" style="margin-bottom:22px">All four are external focus wearing different clothes. Worth knowing each one — you'll recognize the others soon enough.</p>
+      <div class="wsl-four" id="wslFour"></div>
+    </div>
+
+    <div style="margin-top:44px; border-top:2px solid var(--ink); padding-top:28px">
+      <p class="lede" style="margin-bottom:10px">Your starting line is not your destiny. It's where you begin.</p>
+      <p class="quiet">From <em>WAIT, Where Am I In This?</em> by Dr. Lee Long</p>
+    </div>
+  </section>
+
+</div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---- The four. Definitions are verbatim from Chapter 2 of the manuscript. ----
+  var FOUR = {
+    second: {
+      name: "Speaking a second language",
+      def: "Most of us are walking around speaking a second language without realizing our native tongue is still available to us. We're so fluent in \u201Cyou\u201D statements that we've forgotten how to speak from \u201CI.\u201D",
+      ask: "Where are you in that statement?",
+      extra: "It's like trying to be vulnerable while wearing armor."
+    },
+    mind: {
+      name: "Mind reading",
+      def: "You make quick, certain conclusions about others' motives and hidden messages toward you when they interact with you. You do not hold these as hypotheses but as facts.",
+      ask: "What am I assuming without evidence?",
+      extra: "The antidote to mind reading is curiosity — about others, yes, but first about yourself."
+    },
+    control: {
+      name: "The control illusion",
+      def: "You've built your life around being the one with the answers, the one in control. Then something happens that shows you just how little control you actually have, and you don't know who you are without that illusion.",
+      ask: "Am I seeking control of others' actions? Of their view of me?",
+      extra: "When you give up the illusion of control, you gain the reality of influence."
+    },
+    pattern: {
+      name: "The pattern loop",
+      def: "You're stuck in patterns of interaction that aren't working, but you can't seem to find another way. You know something needs to change, but you keep repeating the same pattern.",
+      ask: "What old pattern were you playing out?",
+      extra: "Using old patterns to navigate new situations is like wearing your childhood winter coat: at some point, you've got to admit it doesn't fit anymore."
+    }
+  };
+  var KEYS = ["mind", "control", "pattern", "second"];
+
+  // ---- 12 scenarios. Stems and options are new writing, not book text. ----
+  var ITEMS = [
+    { stem: "You text a friend about something that mattered to you. Two days pass. No reply.", o: {
+      mind: "You land on the reason. They're annoyed with you, or you were too much. It isn't a guess anymore.",
+      control: "You draft and redraft a follow-up until it will land the right way.",
+      pattern: "It's familiar. This is what happens with people, and you already know how it ends.",
+      second: "You tell someone else what your friend did \u2014 how long it's been, how they always do this. None of it is about what it stirred in you." } },
+
+    { stem: "Your partner is quiet through dinner.", o: {
+      mind: "You know that look. They're disappointed in you.",
+      control: "You start working the mood — lighter subject, small joke, whatever brings them back.",
+      second: "What comes out of your mouth is about them. \u201CYou've been off all week.\u201D Not a word about what the quiet does to you.",
+      pattern: "Same silence, same chair, same night you've had a hundred times." } },
+
+    { stem: "Your boss gives you feedback that stings.", o: {
+      second: "You replay their exact wording for days. What you needed from that meeting never gets said out loud.",
+      mind: "They've decided you're not up to it. You heard it underneath the words.",
+      control: "You start planning how to be seen differently next time. Get ahead of it.",
+      pattern: "You've been the one who has to prove it since you were a kid." } },
+
+    { stem: "A friend cancels plans an hour before.", o: {
+      mind: "It's about you. You were too much last time.",
+      control: "You offer three other dates before they've finished the sentence.",
+      pattern: "People pull back. This is the shape it always takes.",
+      second: "You retell what they did, in detail, to anyone who'll listen. Not what it did to you." } },
+
+    { stem: "Someone asks how you're really doing after a hard stretch.", o: {
+      second: "You tell them how everyone else in the house is holding up.",
+      control: "You give the version that keeps them from worrying about you.",
+      mind: "You already know they want to hear you're fine. So that's what they get.",
+      pattern: "You do what you've always done. Steady. Handle it. Move on." } },
+
+    { stem: "An argument goes sideways and you can't say when.", o: {
+      second: "Afterward you can list everything they said wrong. What you needed, you never said.",
+      mind: "Halfway through you knew where they were going, so you answered that instead.",
+      control: "You kept steering — trying to land it somewhere safe before it got worse.",
+      pattern: "The words change every time. The dance doesn't." } },
+
+    { stem: "Someone in your family makes a choice you think is a mistake.", o: {
+      control: "You look for the angle that gets them to reconsider.",
+      mind: "You know exactly why they're doing it, and the reason isn't a good one.",
+      second: "Every conversation you have about it is about their decision. None of it is about your fear.",
+      pattern: "Your family has run this exact play before. You know all the parts." } },
+
+    { stem: "Someone gives you a compliment you weren't expecting.", o: {
+      mind: "They're being polite. They don't actually mean it.",
+      second: "You turn it back to them fast. Say something about their work instead.",
+      pattern: "The same discomfort that's been there since you were young.",
+      control: "You correct the record — name what you could have done better, before they build a picture you can't manage." } },
+
+    { stem: "You need to ask for something. A raise, help, a change at home.", o: {
+      second: "You rehearse what they need to hear. Your own want never quite makes it into the sentence.",
+      control: "You script it so the answer can only be yes.",
+      mind: "You already know what they'll say, so you don't ask.",
+      pattern: "You've never been the one who asks. That's other people." } },
+
+    { stem: "You post something in a group chat and it goes quiet.", o: {
+      mind: "They thought it was stupid.",
+      control: "You consider deleting it.",
+      second: "You say something about how nobody in that chat ever engages. Not that it landed on you.",
+      pattern: "This is the part where you go smaller. It's automatic." } },
+
+    { stem: "Your partner is carrying something heavy and won't talk about it.", o: {
+      control: "You try approaches until one of them works.",
+      second: "You could describe their state in real detail. Yours never comes up.",
+      mind: "You know what it's about. You settled that a while ago.",
+      pattern: "You take up the same position you always take when this happens." } },
+
+    { stem: "You notice you're upset and can't name why.", o: {
+      second: "When you finally talk about it, it comes out as what they did.",
+      mind: "You settle on the person and the reason quickly, and it sticks.",
+      pattern: "You know this feeling. It's an old one, and it has a shape.",
+      control: "You get busy. Find something you can actually manage." } }
+  ];
+
+  // ---- 4 frequency items. New writing, not book text. Gives intensity, not just rank. ----
+  var FREQ = [
+    { key: "mind",    q: "You land on why someone did something, and you're sure, without having asked." },
+    { key: "control", q: "You find yourself managing how something will land before it happens." },
+    { key: "pattern", q: "You realize partway through that you've had this exact conversation before." },
+    { key: "second",  q: "What you say out loud turns out to be about them rather than about you." }
+  ];
+  var SCALE = ["Rarely", "Sometimes", "Often", "Most days"];
+
+  // ---- state ----
+  var order = [], idx = 0, answers = [], freq = [], scores = { mind:0, control:0, pattern:0, second:0 };
+
+  function shuffle(a) {
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  ITEMS.forEach(function (it) { order.push(shuffle(KEYS.slice())); });
+
+  // ---- render a question ----
+  function render() {
+    var item = ITEMS[idx];
+    $("wslCount").textContent = "Moment " + (idx + 1) + " of " + ITEMS.length;
+    $("wslFill").style.width = (idx / (ITEMS.length + 4) * 100) + "%";
+    $("wslStem").textContent = item.stem;
+
+    var ul = $("wslOpts");
+    ul.innerHTML = "";
+    order[idx].forEach(function (key) {
+      var li = document.createElement("li");
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "wsl-opt";
+      b.textContent = item.o[key];
+      b.setAttribute("aria-pressed", answers[idx] === key ? "true" : "false");
+      b.addEventListener("click", function () {
+        answers[idx] = key;
+        Array.prototype.forEach.call(ul.querySelectorAll(".wsl-opt"), function (x) {
+          x.setAttribute("aria-pressed", "false");
+        });
+        b.setAttribute("aria-pressed", "true");
+        $("wslNext").disabled = false;
+      });
+      li.appendChild(b);
+      ul.appendChild(li);
+    });
+
+    $("wslNext").disabled = !answers[idx];
+    $("wslNext").textContent = (idx === ITEMS.length - 1) ? "Almost done" : "Next";
+    $("wslPrev").classList.toggle("wsl-hide", idx === 0);
+    $("wslStem").focus();
+  }
+
+  function renderFreq() {
+    var wrap = $("wslFreqList");
+    wrap.innerHTML = "";
+    FREQ.forEach(function (item, i) {
+      var d = document.createElement("div");
+      var q = document.createElement("p"); q.textContent = item.q;
+      var row = document.createElement("div"); row.className = "wsl-scale";
+      SCALE.forEach(function (label, v) {
+        var b = document.createElement("button");
+        b.type = "button"; b.className = "wsl-tick"; b.textContent = label;
+        b.setAttribute("aria-pressed", freq[i] === v ? "true" : "false");
+        b.addEventListener("click", function () {
+          freq[i] = v;
+          Array.prototype.forEach.call(row.querySelectorAll(".wsl-tick"), function (x) {
+            x.setAttribute("aria-pressed", "false");
+          });
+          b.setAttribute("aria-pressed", "true");
+          $("wslFreqNext").disabled = freq.filter(function (x) { return x !== undefined; }).length < FREQ.length;
+        });
+        row.appendChild(b);
+      });
+      d.appendChild(q); d.appendChild(row);
+      wrap.appendChild(d);
+    });
+    $("wslFreqNext").disabled = freq.filter(function (x) { return x !== undefined; }).length < FREQ.length;
+  }
+
+  function intensity() {
+    var t = 0;
+    freq.forEach(function (v) { t += (v || 0); });
+    if (t <= 3)  return { total: t, band: "low",
+      copy: "Across an ordinary week, none of this is running much right now. That is worth knowing too. It is a good time to learn the four while the stakes are low, because the moment you need them is rarely the moment you can think clearly." };
+    if (t <= 8)  return { total: t, band: "moderate",
+      copy: "This shows up regularly in your weeks, which puts you with most people. The four are not unusual. What is unusual is catching one while it is happening." };
+    return { total: t, band: "high",
+      copy: "This is showing up a lot right now, across more than one of the four. A set of questions can name a pattern; it cannot work one through with you. If your relationships feel stuck, that is worth taking to someone in person." };
+  }
+
+  function show(id) {
+    ["wslIntro", "wslQuiz", "wslFreq", "wslGate", "wslResult"].forEach(function (s) {
+      $(s).classList.add("wsl-hide");
+      $(s).classList.remove("wsl-fade");
+    });
+    $(id).classList.remove("wsl-hide");
+    $(id).classList.add("wsl-fade");
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }
+
+  function tally() {
+    scores = { mind:0, control:0, pattern:0, second:0 };
+    answers.forEach(function (k) { if (k) scores[k]++; });
+    return KEYS.slice().sort(function (a, b) { return scores[b] - scores[a]; });
+  }
+
+  // ---- events ----
+  $("wslStart").addEventListener("click", function () { show("wslQuiz"); render(); });
+
+  $("wslPrev").addEventListener("click", function () {
+    if (idx > 0) { idx--; render(); }
+  });
+
+  $("wslNext").addEventListener("click", function () {
+    if (!answers[idx]) return;
+    if (idx < ITEMS.length - 1) { idx++; render(); return; }
+    show("wslFreq");
+    renderFreq();
+  });
+
+  $("wslFreqPrev").addEventListener("click", function () { show("wslQuiz"); render(); });
+  $("wslFreqNext").addEventListener("click", function () { show("wslGate"); });
+
+  $("wslSend").addEventListener("click", function () {
+    var name = $("wslName").value.trim();
+    var email = $("wslEmail").value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+      $("wslErr").textContent = "That email address doesn't look complete. Check it and try again.";
+      $("wslEmail").focus();
+      return;
+    }
+    $("wslErr").textContent = "";
+
+    var ranked = tally();
+
+    /* ===================== INTEGRATION POINT =====================
+       Send to the email platform here. Replace with the real endpoint.
+       `payload` carries everything needed to segment the list by starting line.
+
+       fetch("https://YOUR-ESP-ENDPOINT", {
+         method: "POST",
+         headers: { "Content-Type": "application/json" },
+         body: JSON.stringify(payload)
+       });
+       ============================================================= */
+    var payload = {
+      name: name,
+      email: email,
+      starting_line: ranked[0],
+      scores: scores,
+      intensity_total: intensity().total,
+      intensity_band: intensity().band,
+      frequency: freq,
+      answers: answers,
+      source: "find-your-starting-line",
+      completed_at: new Date().toISOString()
+    };
+    if (window.console) console.log("WAIT quiz submission", payload);
+
+    paint(name, ranked);
+    show("wslResult");
+  });
+
+  // ---- results ----
+  function paint(name, ranked) {
+    var top = FOUR[ranked[0]];
+    var tied = ranked.filter(function (k) { return scores[k] === scores[ranked[0]]; });
+    $("wslHello").textContent = name ? name + " —" : "";
+
+    var said = document.createDocumentFragment();
+    if (tied.length > 1) {
+      said.appendChild(document.createTextNode("Across twelve moments you landed evenly on "));
+      tied.forEach(function (k, i) {
+        var b = document.createElement("b"); b.textContent = FOUR[k].name.toLowerCase();
+        said.appendChild(b);
+        if (i < tied.length - 2) said.appendChild(document.createTextNode(", "));
+        else if (i === tied.length - 2) said.appendChild(document.createTextNode(" and "));
+      });
+      said.appendChild(document.createTextNode(". No single one is out in front, so take the first as a place to start looking."));
+    } else {
+      said.appendChild(document.createTextNode("Across twelve moments, the one that showed up most in your answers was "));
+      var b = document.createElement("b"); b.textContent = top.name.toLowerCase();
+      said.appendChild(b);
+      said.appendChild(document.createTextNode(" — " + scores[ranked[0]] + " times out of " + ITEMS.length + "."));
+    }
+    $("wslSaid").innerHTML = "";
+    $("wslSaid").appendChild(said);
+
+    $("wslDefTitle").textContent = "About " + top.name.toLowerCase();
+    $("wslDef").textContent = top.def;
+    $("wslAsk").textContent = "Next time it happens, ask yourself: " + top.ask;
+    $("wslBand").textContent = intensity().copy;
+
+    var rank = $("wslRank");
+    rank.innerHTML = "";
+    ranked.forEach(function (k) {
+      var row = document.createElement("div");
+      row.className = "wsl-row";
+      var b = document.createElement("b"); b.textContent = FOUR[k].name;
+      var bar = document.createElement("div"); bar.className = "wsl-bar";
+      var fill = document.createElement("i");
+      fill.style.width = (scores[k] / ITEMS.length * 100) + "%";
+      bar.appendChild(fill);
+      var n = document.createElement("span");
+      n.textContent = scores[k] + " of " + ITEMS.length;
+      row.appendChild(b); row.appendChild(bar); row.appendChild(n);
+      rank.appendChild(row);
+    });
+
+    var four = $("wslFour");
+    four.innerHTML = "";
+    KEYS.forEach(function (k) {
+      var d = document.createElement("div");
+      var h = document.createElement("h3"); h.textContent = FOUR[k].name;
+      var p = document.createElement("p"); p.textContent = FOUR[k].def; p.style.margin = "0 0 10px";
+      var e = document.createElement("p");
+      e.className = "quiet"; e.style.margin = "0"; e.style.fontStyle = "italic";
+      e.textContent = FOUR[k].extra;
+      d.appendChild(h); d.appendChild(p); d.appendChild(e);
+      four.appendChild(d);
+    });
+  }
+
+  $("wslStem").setAttribute("tabindex", "-1");
+})();
+</script>
